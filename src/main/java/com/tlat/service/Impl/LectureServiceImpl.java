@@ -6,8 +6,12 @@ import com.tlat.Entity.LectureStatus;
 import com.tlat.Entity.Room;
 import com.tlat.Repository.LectureRepository;
 import com.tlat.Repository.RoomRepository;
+import com.tlat.service.IpVerificationService;
 import com.tlat.service.LectureService;
 
+import jakarta.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,38 +25,124 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 public class LectureServiceImpl implements LectureService {
-    
+
     private final LectureRepository lectureRepository;
     private final RoomRepository roomRepository;
+    private final IpVerificationService ipVerificationService;
 
-    public LectureServiceImpl(LectureRepository lectureRepository, RoomRepository roomRepository) {
+    private static final Logger logger = LoggerFactory.getLogger(LectureServiceImpl.class);
+
+    @Autowired
+    public LectureServiceImpl(LectureRepository lectureRepository, RoomRepository roomRepository, IpVerificationService ipVerificationService) {
         this.lectureRepository = lectureRepository;
         this.roomRepository = roomRepository;
+        this.ipVerificationService = ipVerificationService;
     }
 
     @Scheduled(fixedRate = 60000) // Run every minute
     public void updateLectureStatuses() {
         LocalDateTime now = LocalDateTime.now();
         List<Lecture> lectures = lectureRepository.findAll();
-        
+
         for (Lecture lecture : lectures) {
-            LocalDateTime lectureStart = LocalDateTime.of(lecture.getDate(), lecture.getStartTime());
             LocalDateTime lectureEnd = LocalDateTime.of(lecture.getDate(), lecture.getEndTime());
-            
+
+            // Only update status if it's SCHEDULED
             if (lecture.getStatus() == LectureStatus.SCHEDULED) {
+                // If current time is after end time and lecture wasn't started
                 if (now.isAfter(lectureEnd)) {
                     lecture.setStatus(LectureStatus.MISSED);
-                } else if (now.isAfter(lectureStart) && now.isBefore(lectureEnd)) {
-                    lecture.setStatus(LectureStatus.IN_PROGRESS);
+                    lecture.setIsActive(false);
                 }
-            } else if (lecture.getStatus() == LectureStatus.IN_PROGRESS && now.isAfter(lectureEnd)) {
+            }
+            // If lecture is IN_PROGRESS and current time is after end time
+            else if (lecture.getStatus() == LectureStatus.IN_PROGRESS && now.isAfter(lectureEnd)) {
                 lecture.setStatus(LectureStatus.COMPLETED);
+                lecture.setIsActive(false);
+                lecture.setSessionEndTime(now);
             }
         }
-        
+
         lectureRepository.saveAll(lectures);
+    }
+
+    @Override
+    public void startLecture(Long id, HttpServletRequest request) {
+        Lecture lecture = lectureRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Lecture not found: " + id));
+
+        // Verify time constraints
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime lectureStart = LocalDateTime.of(lecture.getDate(), lecture.getStartTime());
+        LocalDateTime lectureEnd = LocalDateTime.of(lecture.getDate(), lecture.getEndTime());
+
+        if (now.isBefore(lectureStart)) {
+            throw new RuntimeException("Cannot start lecture before scheduled time");
+        }
+
+        if (now.isAfter(lectureEnd)) {
+            lecture.setStatus(LectureStatus.MISSED);
+            lecture.setIsActive(false);
+            lectureRepository.save(lecture);
+            throw new RuntimeException("Lecture time has passed");
+        }
+
+        // Verify IP address
+        if (!ipVerificationService.verifyIpAddress(lecture.getRoom().getRoomNumber(), request)) {
+            throw new RuntimeException("Invalid IP address for this room");
+        }
+
+        // Update lecture status
+        lecture.setStatus(LectureStatus.IN_PROGRESS);
+        lecture.setIsActive(true);
+        lecture.setSessionStartTime(now);
+        lectureRepository.save(lecture);
+
+        logger.info("Lecture with ID {} started successfully. Status: {}", id, lecture.getStatus());
+    }
+
+    @Override
+    public void stopLecture(Long id, HttpServletRequest request) {
+        Lecture lecture = lectureRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Lecture not found: " + id));
+
+        // Verify IP address
+        if (!ipVerificationService.verifyIpAddress(lecture.getRoom().getRoomNumber(), request)) {
+            throw new RuntimeException("Invalid IP address for this room");
+        }
+
+        // Verify lecture status
+        if (lecture.getStatus() != LectureStatus.IN_PROGRESS) {
+            throw new RuntimeException("Can only stop lectures that are in progress");
+        }
+
+        // Verify time constraints
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime lectureEnd = LocalDateTime.of(lecture.getDate(), lecture.getEndTime());
+
+        if (now.isBefore(lectureEnd)) {
+            throw new RuntimeException("Cannot end lecture before end time");
+        }
+
+        // Update lecture status
+        lecture.setStatus(LectureStatus.COMPLETED);
+        lecture.setSessionEndTime(now);
+        lecture.setIsActive(false);
+        lectureRepository.save(lecture);
+    }
+
+    @Override
+    public void saveLecture(LectureDto lectureDto) {
+        Lecture lecture = mapToEntity(lectureDto);
+        // Always set initial status to SCHEDULED
+        lecture.setStatus(LectureStatus.SCHEDULED);
+        lecture.setIsActive(false);
+        lectureRepository.save(lecture);
     }
 
     @Override
@@ -84,12 +174,6 @@ public class LectureServiceImpl implements LectureService {
         Lecture lecture = lectureRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Lecture not found: " + id));
         lectureRepository.delete(lecture);
-    }
-
-    @Override
-    public void saveLecture(LectureDto lectureDto) {
-        Lecture lecture = mapToEntity(lectureDto);
-        lectureRepository.save(lecture);
     }
 
     @Override

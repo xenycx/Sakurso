@@ -26,37 +26,39 @@ public class springSecurity {
     }
 
     @Bean
-public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http
-        .authorizeHttpRequests((authorize) -> authorize
-            // Public access
-            .requestMatchers("/webjars/**", "/register/**", "/forgot/**", "/index", "/").permitAll()
-            
-            // Shared access (both ADMIN and USER)
-            .requestMatchers("/main").hasAnyRole("ADMIN", "USER")
-            .requestMatchers("/lectures").hasAnyRole("ADMIN", "USER")
-            .requestMatchers("/rooms").hasAnyRole("ADMIN", "USER")
-            
-            // ADMIN only access
-            .requestMatchers("/users/**").hasRole("ADMIN")
-            .requestMatchers("/add/**").hasRole("ADMIN")
-            .requestMatchers("/edit/**").hasRole("ADMIN")
-            .requestMatchers("/delete/**").hasRole("ADMIN")
-            .requestMatchers("/rooms/add/**").hasRole("ADMIN")
-            .requestMatchers("/rooms/edit/**").hasRole("ADMIN") 
-            .requestMatchers("/rooms/delete/**").hasRole("ADMIN")
-            .requestMatchers("/lectures/add/**").hasRole("ADMIN")
-            .requestMatchers("/lectures/edit/**").hasRole("ADMIN")
-            .requestMatchers("/lectures/delete/**").hasRole("ADMIN")
-            .requestMatchers("/lectures/import/**").hasRole("ADMIN")
-            
-            .anyRequest().authenticated()
-        )
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .authorizeHttpRequests((authorize) -> authorize
+                // Static resources
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
+                // Public access
+                .requestMatchers("/register/**", "/forgot/**", "/index", "/").permitAll()
+                
+                // Shared access (both ADMIN and USER)
+                .requestMatchers("/main").hasAnyRole("ADMIN", "USER")
+                .requestMatchers("/lectures").hasAnyRole("ADMIN", "USER")
+                .requestMatchers("/rooms").hasAnyRole("ADMIN", "USER")
+                
+                // ADMIN only access
+                .requestMatchers("/users/**").hasRole("ADMIN")
+                .requestMatchers("/add/**").hasRole("ADMIN")
+                .requestMatchers("/edit/**").hasRole("ADMIN")
+                .requestMatchers("/delete/**").hasRole("ADMIN")
+                .requestMatchers("/rooms/add/**").hasRole("ADMIN")
+                .requestMatchers("/rooms/edit/**").hasRole("ADMIN") 
+                .requestMatchers("/rooms/delete/**").hasRole("ADMIN")
+                .requestMatchers("/lectures/add/**").hasRole("ADMIN")
+                .requestMatchers("/lectures/edit/**").hasRole("ADMIN")
+                .requestMatchers("/lectures/delete/**").hasRole("ADMIN")
+                .requestMatchers("/lectures/import/**").hasRole("ADMIN")
+                
+                .anyRequest().authenticated()
+            )
             .formLogin(
                 form -> form
                     .loginPage("/login")
                     .loginProcessingUrl("/login")
-                    .defaultSuccessUrl("/main")  // Redirect to main page after login
+                    .defaultSuccessUrl("/main")
                     .permitAll())
             .logout(
                 logout -> logout

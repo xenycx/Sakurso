@@ -38,4 +38,12 @@ public class LectureDto {
 
     @NotNull(message = "Status is required")
     private LectureStatus status = LectureStatus.SCHEDULED;
+
+    public LectureStatus getStatus() {
+        return status != null ? status : LectureStatus.SCHEDULED;
+    }
+
+    public void setStatus(LectureStatus status) {
+        this.status = status;
+    }
 }

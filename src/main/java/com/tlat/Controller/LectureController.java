@@ -5,16 +5,16 @@ import com.tlat.service.LectureService;
 import com.tlat.service.RoomService;
 import com.tlat.service.UserService;
 import com.tlat.Entity.User;
-
-import jakarta.validation.Valid;
-
-import java.security.Principal;
-import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/lectures")
@@ -24,31 +24,37 @@ public class LectureController {
     private final RoomService roomService;
     private final UserService userService;
 
-      public LectureController(LectureService lectureService, 
-                              RoomService roomService,
-                              UserService userService) {
-         this.lectureService = lectureService;
-         this.roomService = roomService;
-         this.userService = userService;
-      }
+    @Autowired
+    public LectureController(LectureService lectureService, 
+                            RoomService roomService,
+                            UserService userService) {
+        this.lectureService = lectureService;
+        this.roomService = roomService;
+        this.userService = userService;
+    }
 
     @GetMapping
-    public String listLectures(Model model, Principal principal) {
+public String listLectures(Model model, Principal principal) {
     // Get logged in user
     User user = userService.findUserByEmail(principal.getName());
     String fullName = user.getName();
     
-    List<LectureDto> lectures;
+    List<LectureDto> lectures = new ArrayList<>(); // Initialize empty list
     
-    // If user has ADMIN role, show all lectures
-    if (user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN"))) {
-        lectures = lectureService.findAllLectures();
-    } else {
-        // For regular users, show only their lectures
-        lectures = lectureService.findLecturesByLecturer(fullName);
+    try {
+        // If user has ADMIN role, show all lectures
+        if (user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN"))) {
+            lectures = lectureService.findAllLectures();
+        } else {
+            // For regular users, show only their lectures
+            lectures = lectureService.findLecturesByLecturer(fullName);
+        }
+    } catch (Exception e) {
+        // Log the error
+        e.printStackTrace();
     }
     
-    model.addAttribute("lectures", lectures);
+    model.addAttribute("lectures", lectures != null ? lectures : new ArrayList<>());
     return "lecture/list";
 }
 
@@ -59,10 +65,9 @@ public class LectureController {
         model.addAttribute("users", userService.findAllUsers());
         return "lecture/add";
     }
-
     @PostMapping("/add")
-    public String addLecture(@Valid @ModelAttribute LectureDto lecture, 
-                           BindingResult result) {
+    public String addLecture(@jakarta.validation.Valid @ModelAttribute LectureDto lecture, 
+                           org.springframework.validation.BindingResult result) {
         if (result.hasErrors()) {
             return "lecture/add";
         }
@@ -77,17 +82,17 @@ public class LectureController {
     }
 
     @GetMapping("/edit/{id}")
-public String showEditForm(@PathVariable Long id, Model model) {
-    LectureDto lecture = lectureService.findLectureById(id);
-    model.addAttribute("lecture", lecture);
-    model.addAttribute("rooms", roomService.findAllRooms());
-    model.addAttribute("users", userService.findAllUsers());
-    return "lecture/edit";
-}
+    public String showEditForm(@PathVariable Long id, Model model) {
+        LectureDto lecture = lectureService.findLectureById(id);
+        model.addAttribute("lecture", lecture);
+        model.addAttribute("rooms", roomService.findAllRooms());
+        model.addAttribute("users", userService.findAllUsers());
+        return "lecture/edit";
+    }
 
     @PostMapping("/edit/{id}")
-    public String editLecture(@Valid @ModelAttribute LectureDto lecture, 
-                            BindingResult result,
+    public String editLecture(@jakarta.validation.Valid @ModelAttribute LectureDto lecture, 
+                            org.springframework.validation.BindingResult result,
                             @PathVariable Long id) {
         if (result.hasErrors()) {
             return "lecture/edit";
@@ -99,6 +104,28 @@ public String showEditForm(@PathVariable Long id, Model model) {
     @GetMapping("/delete/{id}")
     public String deleteLecture(@PathVariable Long id) {
         lectureService.deleteLectureById(id);
+        return "redirect:/lectures";
+    }
+
+    @PostMapping("/start/{id}")
+    public String startLecture(@PathVariable Long id, HttpServletRequest request, RedirectAttributes redirectAttributes) {
+        try {
+            lectureService.startLecture(id, request);
+            redirectAttributes.addFlashAttribute("successMessage", "Lecture started successfully");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error starting lecture: " + e.getMessage());
+        }
+        return "redirect:/lectures";
+    }
+
+    @PostMapping("/stop/{id}")
+    public String stopLecture(@PathVariable Long id, HttpServletRequest request, RedirectAttributes redirectAttributes) {
+        try {
+            lectureService.stopLecture(id, request);
+            redirectAttributes.addFlashAttribute("successMessage", "Lecture stopped successfully");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error stopping lecture: " + e.getMessage());
+        }
         return "redirect:/lectures";
     }
 }
