@@ -47,4 +47,8 @@ public class Lecture {
 
     @Column(nullable = false)
     private String subject;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private LectureStatus status = LectureStatus.SCHEDULED;
 }

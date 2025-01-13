@@ -2,16 +2,20 @@ package com.tlat.service.Impl;
 
 import com.tlat.Dto.LectureDto;
 import com.tlat.Entity.Lecture;
+import com.tlat.Entity.LectureStatus;
 import com.tlat.Entity.Room;
 import com.tlat.Repository.LectureRepository;
 import com.tlat.Repository.RoomRepository;
 import com.tlat.service.LectureService;
+
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +30,29 @@ public class LectureServiceImpl implements LectureService {
     public LectureServiceImpl(LectureRepository lectureRepository, RoomRepository roomRepository) {
         this.lectureRepository = lectureRepository;
         this.roomRepository = roomRepository;
+    }
+
+    @Scheduled(fixedRate = 60000) // Run every minute
+    public void updateLectureStatuses() {
+        LocalDateTime now = LocalDateTime.now();
+        List<Lecture> lectures = lectureRepository.findAll();
+        
+        for (Lecture lecture : lectures) {
+            LocalDateTime lectureStart = LocalDateTime.of(lecture.getDate(), lecture.getStartTime());
+            LocalDateTime lectureEnd = LocalDateTime.of(lecture.getDate(), lecture.getEndTime());
+            
+            if (lecture.getStatus() == LectureStatus.SCHEDULED) {
+                if (now.isAfter(lectureEnd)) {
+                    lecture.setStatus(LectureStatus.MISSED);
+                } else if (now.isAfter(lectureStart) && now.isBefore(lectureEnd)) {
+                    lecture.setStatus(LectureStatus.IN_PROGRESS);
+                }
+            } else if (lecture.getStatus() == LectureStatus.IN_PROGRESS && now.isAfter(lectureEnd)) {
+                lecture.setStatus(LectureStatus.COMPLETED);
+            }
+        }
+        
+        lectureRepository.saveAll(lectures);
     }
 
     @Override
@@ -140,6 +167,7 @@ public class LectureServiceImpl implements LectureService {
         lecture.setLecturer(dto.getLecturer());
         lecture.setSubject(dto.getSubject());
         lecture.setIsActive(false);
+        lecture.setStatus(dto.getStatus());
         return lecture;
     }
 
@@ -152,6 +180,7 @@ public class LectureServiceImpl implements LectureService {
         dto.setEndTime(lecture.getEndTime());
         dto.setLecturer(lecture.getLecturer());
         dto.setSubject(lecture.getSubject());
+        dto.setStatus(lecture.getStatus());
         
         return dto;
     }

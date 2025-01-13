@@ -9,6 +9,8 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import com.tlat.Entity.LectureStatus;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -33,4 +35,7 @@ public class LectureDto {
     
     @NotBlank(message = "Subject is required")
     private String subject;
+
+    @NotNull(message = "Status is required")
+    private LectureStatus status = LectureStatus.SCHEDULED;
 }

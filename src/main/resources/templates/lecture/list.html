@@ -8,6 +8,13 @@
     <title>Lecture List</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <style>
+        .badge {
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        </style>
 </head>
 
 <body>
@@ -47,6 +54,7 @@
                             <th>Lecturer</th>
                             <th>Subject</th>
                             <th sec:authorize="hasRole('ADMIN')">Action</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -67,6 +75,14 @@
                                         <i class="bi bi-trash"></i> Delete
                                     </a>
                                 </div>
+                            </td>
+                            <td>
+                                <span th:class="${'badge ' + 
+                                    (lecture.status == 'SCHEDULED' ? 'bg-primary' : 
+                                    (lecture.status == 'IN_PROGRESS' ? 'bg-warning' :
+                                    (lecture.status == 'COMPLETED' ? 'bg-success' : 'bg-danger')))}">
+                                    <span th:text="${lecture.status}"></span>
+                                </span>
                             </td>
                         </tr>
                     </tbody>
