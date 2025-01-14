@@ -1,7 +1,9 @@
 package com.tlat.Controller;
 
 import com.tlat.Dto.RoomDto;
+import com.tlat.Entity.Room;
 import com.tlat.service.RoomService;
+import com.tlat.Repository.RoomRepository;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -21,9 +23,11 @@ import java.util.List;
 public class RoomController {
 
     private RoomService roomService;
+    private RoomRepository roomRepository;
 
-    public RoomController(RoomService roomService) {
+    public RoomController(RoomService roomService, RoomRepository roomRepository) {
         this.roomService = roomService;
+        this.roomRepository = roomRepository;
     }
 
     @GetMapping
@@ -121,5 +125,15 @@ public class RoomController {
             }
             
             return remoteAddr;
+        }
+
+        @GetMapping("/find-by-ip")
+        @ResponseBody
+        public ResponseEntity<Room> findRoomByIp(@RequestParam String ip) {
+            Room room = roomRepository.findByIpAddress(ip);
+            if (room != null) {
+                return ResponseEntity.ok(room);
+            }
+            return ResponseEntity.notFound().build();
         }
 }

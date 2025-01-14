@@ -1,37 +1,91 @@
 <div th:fragment="nav-bar">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
     <link rel="stylesheet" th:href="@{/css/dark-theme.css}">
     <div class="nav-wrapper">
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container-fluid">
-                <a class="navbar-brand" th:href="@{/main}">TLAT</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
-                        data-bs-target="#navbarSupportedContent" 
-                        aria-controls="navbarSupportedContent" 
-                        aria-expanded="false" 
-                        aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
-                        <a class="nav-link active" aria-current="page" th:href="@{/users}">Users</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" th:href="@{/rooms}">Rooms</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" th:href="@{/lectures}">Lectures</a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link active " aria-current="page" th:href="@{/logout}">Logout</a>
-                    </li>
-                </ul>
+                <!-- Left side -->
+                <div>
+                    <a class="navbar-brand" th:href="@{/main}">TLAT</a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
+                            data-bs-target="#navbarSupportedContent" 
+                            aria-controls="navbarSupportedContent" 
+                            aria-expanded="false" 
+                            aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                </div>
+
+                <!-- Center - IP Address -->
+                
+                <div class="navbar-center d-none d-lg-block">
+                    <div class="ip-container">
+                        <div class="ip-badge">
+                            <i class="bi bi-pc-display"></i>
+                            <span id="currentIp">Loading IP...</span>
+                        </div>
+                        <div class="room-badge" id="roomInfo" style="display: none">
+                            <i class="bi bi-door-open"></i>
+                            <span id="roomNumber"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right side -->
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                            <a class="nav-link active" aria-current="page" th:href="@{/users}">Users</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" th:href="@{/rooms}">Rooms</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" th:href="@{/lectures}">Lectures</a>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" th:href="@{/logout}">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-        </div>
-    </nav>
+        </nav>
     </div>
+
+    <script>
+        async function updateIpAndRoom() {
+            try {
+                const response = await fetch('/rooms/ip');
+                const ip = await response.text();
+                document.getElementById('currentIp').textContent = ip;
+
+                // Check if this IP is associated with a room
+                const roomResponse = await fetch(`/rooms/find-by-ip?ip=${ip}`);
+                if (roomResponse.ok) {
+                    const roomData = await roomResponse.json();
+                    if (roomData && roomData.roomNumber) {
+                        document.getElementById('roomNumber').textContent = roomData.roomNumber;
+                        document.getElementById('roomInfo').style.display = 'inline-block';
+                    } else {
+                        document.getElementById('roomInfo').style.display = 'none';
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching IP or room:', error);
+                document.getElementById('currentIp').textContent = 'Error loading IP';
+            }
+        }
+
+        // Update IP and room info when page loads
+        updateIpAndRoom();
+
+        // Update every minute
+        setInterval(updateIpAndRoom, 60000);
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 </div>

@@ -307,3 +307,36 @@ input[type="time"],
 input[type="date"] {
     color-scheme: dark !important;
 } 
+
+
+.ip-badge {
+    background-color: var(--dark-surface);
+    color: var(--dark-text);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-family: monospace;
+    border: 1px solid var(--dark-border);
+}
+
+.room-badge {
+    background-color: var(--dark-primary);
+    color: #fffefe;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    margin-left: 0.5rem;
+    font-weight: 500;
+    border: 1px solid var(--dark-border);
+}
+
+.ip-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.navbar-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
