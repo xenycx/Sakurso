@@ -24,6 +24,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Comparator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,6 +82,7 @@ public class LectureServiceImpl implements LectureService {
         LocalDateTime lectureStart = LocalDateTime.of(lecture.getDate(), lecture.getStartTime());
         LocalDateTime lectureEnd = LocalDateTime.of(lecture.getDate(), lecture.getEndTime());
 
+        // Check if lecture is scheduled for current time
         if (now.isBefore(lectureStart)) {
             throw new RuntimeException("Cannot start lecture before scheduled time");
         }
@@ -234,6 +236,24 @@ public class LectureServiceImpl implements LectureService {
         List<Lecture> lectures = lectureRepository.findByLecturer(lecturer);
         return lectures.stream()
                 .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<LectureDto> findLecturesByDate(LocalDate date) {
+        List<Lecture> lectures = lectureRepository.findByDate(date);
+        return lectures.stream()
+                .map(this::mapToDto)
+                .sorted(Comparator.comparing(LectureDto::getStartTime))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<LectureDto> findLecturesByDateAndLecturer(LocalDate date, String lecturer) {
+        return lectureRepository.findByDateAndLecturer(date, lecturer)
+                .stream()
+                .map(this::mapToDto)
+                .sorted(Comparator.comparing(LectureDto::getStartTime))
                 .collect(Collectors.toList());
     }
 

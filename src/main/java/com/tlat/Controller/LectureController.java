@@ -108,24 +108,30 @@ public String listLectures(Model model, Principal principal) {
     }
 
     @PostMapping("/start/{id}")
-    public String startLecture(@PathVariable Long id, HttpServletRequest request, RedirectAttributes redirectAttributes) {
+    public String startLecture(@PathVariable Long id, 
+                             HttpServletRequest request, 
+                             RedirectAttributes redirectAttributes,
+                             @RequestHeader(value = "Referer", required = false) String referer) {
         try {
             lectureService.startLecture(id, request);
             redirectAttributes.addFlashAttribute("successMessage", "Lecture started successfully");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error starting lecture: " + e.getMessage());
         }
-        return "redirect:/lectures";
+        return referer != null ? "redirect:" + referer : "redirect:/lectures";
     }
 
     @PostMapping("/stop/{id}")
-    public String stopLecture(@PathVariable Long id, HttpServletRequest request, RedirectAttributes redirectAttributes) {
+    public String stopLecture(@PathVariable Long id, 
+                            HttpServletRequest request, 
+                            RedirectAttributes redirectAttributes,
+                            @RequestHeader(value = "Referer", required = false) String referer) {
         try {
             lectureService.stopLecture(id, request);
             redirectAttributes.addFlashAttribute("successMessage", "Lecture stopped successfully");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error stopping lecture: " + e.getMessage());
         }
-        return "redirect:/lectures";
+        return referer != null ? "redirect:" + referer : "redirect:/lectures";
     }
 }

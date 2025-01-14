@@ -47,14 +47,6 @@ public String loginForm() {
 	return "login";
 }
 
-@GetMapping("/main")
-public String mainPage(Model model, Principal principal) {
-    String email = principal.getName();
-    User user = userService.findUserByEmail(email);
-    model.addAttribute("user", user);
-    return "main";
-}
-
 @GetMapping("/register")
 public String showRegistrationForm(Model model) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
