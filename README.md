@@ -15,6 +15,21 @@
 
 > სანამ გაუშვებთ ჩახედეთ `pom.xml` ფაილს და მიხვდებით როგორ გაუშვათ. Java-ს 17 ვერსიაზეა აწყობილი ამიტომ Intelij-ით შეიძლება გაგიჭირდეთ გაშვება თუ 21 JDK გიყენიათ
 
+## ფოტოები / დემონსტრაცია
+
+| ფოტო | აღწერა |
+|------------|-------------|
+| ![Screenshot 1](/screenshots/loginScreen.png) | ავტორიზაციის მენიუ |
+| ![Screenshot 2](/screenshots/adminMainPageScreen.png) | ადმინისტრატორის მთავარი გვერდი |
+| ![Screenshot 3](/screenshots/LecturerMainPageScreen.png) | ლექტორის მთავარი გვერდი |
+| ![Screenshot 4](/screenshots/AdminRoomsPageScreen.png) | ადმინისტრატორის ოთახების გვერდი გვერდების დამატება წაშლა რედაქტირება |
+| ![Screenshot 5](/screenshots/AdminAddRoomPageScreen.png) | ოთახის დამატების მენიუ |
+| ![Screenshot 6](/screenshots/AdminLecturesListPageScreen.png) | ადმინისტრატორის ლექციების ჩამონათვალის მენიუ |
+| ![Screenshot 7](/screenshots/AdminEditLecturePageScreen.png) | ლექციის რედაქტირების მენიუ |
+| ![Screenshot 8](/screenshots/AdminEditRoomPageScreen.png) | აუდიტორიის რედაქტირების მენიუ |
+| ![Screenshot 9](/screenshots/AdminEditUserPageScreen.png) | მომხმარებლების რედაქტირების მენიუ |
+| ![Screenshot 10](/screenshots/AdminImportCSVScreen.png) | ლექციების ცხრილების იმპორტირების მენიუ |
+
 ## მასწავლებლის ლექციაზე დასწრების თვალყურის დევნის აპლიკაცია
 
 ### 1. პროექტის მიზანი
