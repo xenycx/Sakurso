@@ -5,18 +5,14 @@
 ## Table of Contents
 
 1. [Introduction](#introduction)
-2. [Project Structure](#project-structure)
-3. [Installation](#installation)
-4. [Database Setup](#database-setup)
-5. [Usage](#usage)
-6. [Features](#features)
-7. [Use Cases](#use-cases)
-8. [IP Address Handling](#ip-address-handling)
-9. [Contributing](#contributing)
-10. [License](#license)
-11. [Contact](#contact)
+2. [Functional Requirements](#ფუნქციონალური-მოთხოვნები---ძირითადი-იუზ-კეისები-მენიუს-პუნქტები)
+3. [Architecture Requirements](#მოთხოვნები-არქიტექტურაზე)
+4. [Interface Layer Requirements](#მოთხოვნები-ინტერფეისულ-შრეზე)
+5. [Business Layer Requirements](#მოთხოვნები-ბიზნეს-შრეზე)
+6. [Data Layer Requirements](#მოთხოვნები-მონაცემთა-შრეზე)
 
 ---
+
 > სანამ გაუშვებთ ჩახედეთ `pom.xml` ფაილს და მიხვდებით როგორ გაუშვათ. Java-ს 17 ვერსიაზეა აწყობილი ამიტომ Intelij-ით შეიძლება გაგიჭირდეთ გაშვება თუ 21 JDK გიყენიათ
 
 ## მასწავლებლის ლექციაზე დასწრების თვალყურის დევნის აპლიკაცია
