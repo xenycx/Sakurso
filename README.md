@@ -19,139 +19,187 @@
 ---
 > სანამ გაუშვებთ ჩახედეთ `pom.xml` ფაილს და მიხვდებით როგორ გაუშვათ. Java-ს 17 ვერსიაზეა აწყობილი ამიტომ Intelij-ით შეიძლება გაგიჭირდეთ გაშვება თუ 21 JDK გიყენიათ
 
-## Introduction
+## მასწავლებლის ლექციაზე დასწრების თვალყურის დევნის აპლიკაცია
 
-Sakurso is a Spring Boot application for monitoring university lectures. It provides functionalities for managing users, rooms, and lectures.
+### 1. პროექტის მიზანი
+შეიქმნას IP-მისამართზე დაფუძნებული ლექციების მართვის სისტემა, რომელიც საგანმანათლებლო დაწესებულებებს საშუალებას მისცემს ეფექტურად მართონ და აკონტროლონ ლექციების ჩატარების პროცესი. სისტემა უზრუნველყოფს ორმაგი როლის (ადმინისტრატორი და ლექტორი) ინტერფეისს სასწავლო რესურსების სამართავად, ლექციების დასაგეგმად და იმის უზრუნველსაყოფად, რომ ლექციები ტარდება მხოლოდ მათთვის განკუთვნილ აუდიტორიებში.
 
-## Project Structure
+### 2. ფუნქციონალური მოთხოვნები - ძირითადი იუზ-კეისები (მენიუს პუნქტები)
+#### I. მონაცემთა ბაზასთან მიერთება/გამოსვლა
+#### II. ადმინისტრატორის მუნქციები:
+- მომხმარებლების მართვა (დამატება, წაშლა, რედაქტირება)
+- აუდიტორიების მართვა და IP მისამართების მინიჭება
+- ლექციების მართვა და რედაქტირება 
 
+#### III. ლექტორის ფუნქციები:
+- სისტემაში შესვლა
+- აუდიტორიების და IP მისმართების ნახვა 
+- დღის ლექციების ნახვა
+
+#### IV. ლექციების მართვა:
+- ლექციების სიის ნახვა
+- ლექციების დაწყება/დასრულება
+- ლექციის სტატუსის ნახვა
+
+#### V. აუდიტორიების მართვა:
+- აუდიტორიების დამატება
+- IP მისამართების კონფიგურაცია
+- აუდიტორიების სტატუსის მონიტორინგი
+
+#### VI. ლექციების ფერიფიკაცია:
+- IP მისამართების შემოწმება
+- დროის შემოწმება
+- ლექციის სტატუსის ავტომატური განახლება
+
+#### VII. ანგარიშება:
+- ჩატარებული ლექციების ისტორია
+- გაცდენილი ლექციების აღრიცხვა
+- სტატისტიკის გენერირება 
+
+#### VIII. უსაფრთხოების მართვა:
+- მომხმარებლის ავთენტიფიკაცია
+- როლებზე დაფუძნებული წვდომის კონტროლი
+
+#### IX. მონაცემების იმპორტი:
+- ლექციების განრიგის იმპორტი csv ფორმატში
+
+### 3. მოთხოვნები არქიტექტურაზე
+სისტემა უნდა აიგოს სამშრიანი არქიტექტურით ვებ აპლიკაციის სახით Java-ზე Spring Boot ფრეიმვორკის გამოყენებით. იგი უნდა შედგებოდეს სამი შრისგან:
+
+#### 1. ინტერფეისული შრე:
+ინტერფეისული შრე წარმოადგენს ვებ-ინტერფეისს, შესრულებულს Thymeleaf-ის შაბლონებით HTML/CSS Bootstrap5-ის და Spring MVC-ის გამოყენებით.
+- **Front-End ტექნოლოგიები:** 
+    - Thymeleaf - სერვერის მხარეს დინამიური HTML შაბლონების შესაქმნელად
+    - HTML/CSS (Bootstrap5) - ვებ გვერდის სტრუქტურისა და სტილის შესაქმნელად
+    - Javascript - ბრაუზერში დინამიური ფუნქციონალის დასამატებლად
+- **კონტროლერები:**
+    - @RestController და @Controller ანოტაციები - HTTP მოთხოვნების დასამუშავებლად
+    - Validation - მომხარებლის შეყვანილი მონაცემების ვალიდაციისთვის
+    - RequestMapping – URL მისამართების მარშუტიზაციისთვის 
+
+#### 2. ბიზნეს ლოგიკის შრე:
+ბიზნეს შრე მოიცავს სისტემაში შემავალ მოდელებს და სერვისებს:
+- **Spring Boot სერვისები:**
+    - @Service ანოტაციით მონიშნული კლასები - ბიზნეს ლოგიკის განსახორციებლად
+    - Spring Security - აუთენთიფიკაციისა და ავტორიზაციის უზრუნველსაყოფად
+- **DTO (Data Transfer Objects):**
+    - მონაცემების გადაცემისთვის სხვადასხვა შრეებს შორის 
+    - Lombok ანოტაციები - კოდის გასამარტივებლად
+
+#### 3. მონაცემების შრე:
+მონაცემთა შრე უზრუნველყოფს მონაცემებთან წვდომას JPA-ს გამოყენებით:
+- **Spring Data JPA:**
+    - Entity კლასები - მონაცემთა ბაზის ცხრილების წარმოსადგენად 
+    - Repository ინტერფეისები - მონაცემთა ბაზასთან საამუშაოდ
+    - JPA/Hibernate - ობიექტ-რელაციური დაკავშირებისთვის (ORM)
+- **მონაცემთა ბაზა:**
+    - MySQL - მონაცემების შესანახად
+    - JDBC - მონაცემთა ბაზასტან კავშირისთვის
+
+### 4. მოთხოვნები ინტერფეისულ შრეზე
+#### 1. ძირითადი გვერდები:
+- ავტორიზაციის გვერდი
+- მთავარი გვერდი
+- ლექციების გვერდი
+- აუდიტორიების მართვის გვერდი
+- მომხმარებლების მართვის გვერდი
+
+#### 2. კონტროლერები:
+- AuthController - ავტორიზაციის მართვისთვის
+- LectureController - ლექციების მართვისთვის 
+- RoomController - ოთახების მართვისთვის
+- MainController - მთავარი გვერდის მართვისთვის
+
+### 5. მოთხოვნები ბიზნეს შრეზე:
+#### 1. მოდელები (Entity კლასები):
+- User – მომხმარებლის მოდელი
+- Lecture – ლექციის მოდელი
+- Room – აუდიტორიის მოდელი
+- Role - როლის მოდელი
+- LectureStatus – ლექციის სტატუსის მოდელი
+
+#### 2. სერვისები:
+- UserService – მომხმარებლების მართვის ლოგიკა
+- LectureService – ლექციების მართვის ლოგიკა
+- RoomService – ოთახების მართვის ლოგიკა
+- IpVerificationService – IP მისამართების შემოწმების ლოგიკა
+
+#### 3. DTO კლასები:
+- UserDto - მომხმარებლების მონაცემთა გადაცემისთვის
+- LectureDto - ლექციის მონაცემთა გადაცემისთვის
+- RoomDto - აუდიტორიის მონაცემების გადაცემისთვის
+
+### 6. მოთხოვნები მონაცემთა შრეზე
+#### 1. Repository ინტეფეისები:
+- UserRepository - მომხმარებლებთან სამუშაოდ
+- LectureRepository - ლექციებთან სამუშაოდ
+- RoomRepository - ოთახებთან სამუშაოდ
+- RoleRepository - როლებთან სამუშაოდ 
+
+მონაცემთა შრე მოიცავს მონაცემებთან წვდომის მოდულს და მონაცემთა ბაზას, რეალიზებულს MySql-ზე. სტუდენტების მონაცემთა ბაზა შედგება ხუთი ცხრილისგან (lectures, roles, rooms, users, user_roles), იხილეთ დიაგრამა. ასევე მოყვანილია ამ ბაზის შექმნის სკრიპტის მაგალითი:
+
+```sql
+-- ბაზის შექმნა
+CREATE DATABASE tlat;
+USE tlat;
+
+-- ლექტორის თეიბლის გაკეთება
+CREATE TABLE lectures (
+        id BIGINT PRIMARY KEY AUTO_INCREMENT,
+        date DATE,
+        end_time TIME,
+        lecturer VARCHAR(255),
+        start_time TIME,
+        subject VARCHAR(255),
+        room_id BIGINT,
+        is_active BOOLEAN,
+        session_end_time DATETIME,
+        session_start_time DATETIME,
+        status VARCHAR(50)
+);
+
+-- როლების თეიბლის გაკეთება
+CREATE TABLE roles (
+        id BIGINT PRIMARY KEY AUTO_INCREMENT,
+        name VARCHAR(255)
+);
+
+-- ოთახის თეიბლის გაკეთება
+CREATE TABLE rooms (
+        id BIGINT PRIMARY KEY AUTO_INCREMENT,
+        ip_address VARCHAR(255),
+        room_number VARCHAR(255)
+);
+
+-- მომხმარებლების თეიბლის გაკეთება
+CREATE TABLE users (
+        id BIGINT PRIMARY KEY AUTO_INCREMENT,
+        address VARCHAR(255),
+        age INT,
+        email VARCHAR(255),
+        gender VARCHAR(255),
+        name VARCHAR(255),
+        password VARCHAR(255),
+        phone VARCHAR(255),
+        username VARCHAR(255)
+);
+
+-- users_roles ცხრილის შექმნა (many-to-many ურთიერთობისთვის)
+CREATE TABLE users_roles (
+        user_id BIGINT,
+        role_id BIGINT,
+        PRIMARY KEY (user_id, role_id),
+        FOREIGN KEY (user_id) REFERENCES users(id),
+        FOREIGN KEY (role_id) REFERENCES roles(id)
+);
+
+-- ნაგულისხმევი როლების ჩასმა 
+INSERT INTO roles (name) VALUES 
+('ROLE_ADMIN'),
+('ROLE_USER');
+
+-- foreign key შეზღუდვის დამატება lectures ცხრილში room_id სვეტისთვის
+ALTER TABLE lectures
+ADD CONSTRAINT fk_lecture_room
+FOREIGN KEY (room_id) REFERENCES rooms(id);
 ```
-src/
-├── main/
-│   ├── java/
-│   │   └── com/
-│   │       └── tlat/
-│   │           ├── Controller/     # Contains controller classes
-│   │           ├── Dto/            # Contains Data Transfer Object classes
-│   │           ├── Entity/         # Contains entity classes
-│   │           ├── service/        # Contains service classes
-│   │           └── tlat.java       # Main application class
-│   └── resources/
-│       ├── application.properties  # Configuration file
-│       └── templates/              # Contains HTML templates
-└── test/
-```
-
-## Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/xenyc1337/Sakurso.git
-   ```
-2. Navigate into the project directory:
-   ```bash
-   cd Sakurso
-   ```
-3. Build the project:
-   ```bash
-   ./mvnw clean install
-   ```
-
-## Database Setup
-
-1. Configure the database connection in `src/main/resources/application.properties`:
-   ```properties
-   spring.datasource.url=jdbc:mysql://localhost:3306/sakurso
-   spring.datasource.username=root
-   spring.datasource.password=yourpassword
-   spring.jpa.hibernate.ddl-auto=update
-   ```
-
-2. Create the database schema:
-
-   ```sql
-   CREATE DATABASE sakurso;
-   ```
-
-   The application will create the necessary tables automatically on startup.
-
-## Usage
-
-1. Run the application:
-   ```bash
-   ./mvnw spring-boot:run
-   ```
-
-2. Access the application at `http://localhost:8080`.
-
-## Features
-
-- User registration and login
-- Room management
-- Lecture scheduling and monitoring
-
-## Use Cases
-
-### User Management
-- Admins can add, edit, and delete users.
-- Users can register, log in, and view their details.
-
-### Room Management
-- Admins can add, edit, and delete rooms.
-- Each room has a unique room number and IP address.
-
-### Lecture Management
-- Admins and users can schedule lectures.
-- Lectures include details such as room number, date, time, lecturer, and status.
-- Users can import lecture schedules from a CSV file.
-
-## IP Address Handling
-
-The application includes functionality to retrieve the IP address of the client making requests. The `RoomController` class handles the extraction of the IP address from the request headers.
-
-```java
-@GetMapping("/ip")
-@ResponseBody
-public ResponseEntity<String> getLocalIpAddress(HttpServletRequest request) {
-    String ipAddress = extractIpAddress(request);
-    return ResponseEntity.ok(ipAddress);
-}
-
-private String extractIpAddress(HttpServletRequest request) {
-    String forwardedFor = request.getHeader("X-Forwarded-For");
-    if (forwardedFor != null && !forwardedFor.isEmpty()) {
-        return forwardedFor.split(",")[0].trim();
-    }
-    String[] headerNames = {
-        "Proxy-Client-IP",
-        "WL-Proxy-Client-IP",
-        "HTTP_X_FORWARDED_FOR",
-        "HTTP_X_REAL_IP"
-    };
-    for (String headerName : headerNames) {
-        String header = request.getHeader(headerName);
-        if (header != null && !header.isEmpty() && !"unknown".equalsIgnoreCase(header)) {
-            return header;
-        }
-    }
-    String remoteAddr = request.getRemoteAddr();
-    if ("0:0:0:0:0:0:0:1".equals(remoteAddr)) {
-        remoteAddr = "127.0.0.1";
-    }
-    return remoteAddr;
-}
-```
-
-## Contributing
-
-Contributions are welcome! Please submit a pull request or open an issue for any bugs or feature requests.
-
-## License
-
-This project is licensed under the MIT License.
-
-## Contact
-
-For any questions or support, please contact the repository owner.
-
----
